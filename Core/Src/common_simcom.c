@@ -156,10 +156,6 @@ float check_signal_simcom(void)
     HAL_Delay(200);
     send_to_simcom_a76xx("AT+CGATT=1\r\n");
     HAL_Delay(200);
-    send_to_simcom_a76xx("AT+CIICR\r\n");
-    HAL_Delay(200);
-    send_to_simcom_a76xx("AT+CIFSR\r\n");
-    HAL_Delay(200);
     send_to_simcom_a76xx("AT+CGDCONT?\r\n");
     HAL_Delay(200);
 
@@ -238,25 +234,16 @@ bool get_file_hex_form_simcom(void)
     HAL_Delay(7000);
     times_data = (get_length_data_form_file_hex(rx_data_sim) / 100 + 1);
     printf("-number of times data is %d bytes \n", times_data);
-    for (int i = 0; i <100; i++) {
+    for (int i = 0; i < 3; i++) {
         printf("\r\n-----------------HTTPACTION SUSSES------------------\n");
         send_to_simcom_a76xx("AT+HTTPREAD=0,100\r\n");
         HAL_Delay(1000);
         cut_data_form_simcom(rx_data_sim);
     }
     printf("sau khi ghep chuoi \r\n%s", buffer_file_hex);
-    //	  if(strstr((char *)rx_data_sim, "+HTTPACTION: 0,200"))
-    //	  {
-    //		  printf("-----------------HTTPACTION SUSSES------------------\n");
-    //			send_to_simcom_a76xx("AT+HTTPREAD=0,100\r\n");
-    //			HAL_Delay(2000);
-    //			cut_data_form_simcom(rx_data_sim);
-    //			send_to_simcom_a76xx("AT+HTTPREAD=0,100\r\n");
-    //			HAL_Delay(2000);
-    //			cut_data_form_simcom(rx_data_sim);
-    //			printf("sau khi ghep chuoi \r\n%s",buffer_file_hex);
-    //
-    //	  }
+    format_file_hex(buffer_file_hex);
+//    printf("sau khi ghep chuoi \r\n%s", buffer_file_hex);
+
     if (strstr((char *)rx_data_sim, "+HTTPREAD: 100")) {
         printf("-----------------READ 100 BYTES DATA SUSSES------------------\n");
     }

@@ -34,6 +34,10 @@ extern int start_http_service(void);
 extern bool get_file_hex_form_simcom(void);
 extern void cut_data_form_simcom(char * data);
 extern int get_length_data_form_file_hex(char * data_file_hex);
+extern int char_to_byte(char c);
+extern int format_file_hex(char *data);
+extern void convert_string_to_array_hex(char *input, uint8_t *output);
+extern int check_format_intel_hex(char *data);
 /* USER CODE END EFP */
 
 /* Exported types ------------------------------------------------------------*/
@@ -68,7 +72,8 @@ extern float signal_strength;
 extern uint8_t total_errors;
 extern int rssi;
 extern bool is_started_http;
-extern char buffer_file_hex[1024*20];
+extern char buffer_file_hex[1024*5];
+extern char string_data[100];
 
 /* USER CODE END ET */
 

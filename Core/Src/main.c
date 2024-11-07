@@ -1,67 +1,66 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "common_simcom.h"
 #include "config.h"
 #include "stdbool.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include <math.h>
-#include "common_simcom.h"
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-char data_memory [20]={":020000040800F2"};
-char swap_data_memory [20];
+char data_memory[20] = {":020000040800F2"};
+char swap_data_memory[20];
 
 char example_file_hex[] =
-"+HTTPREAD: 100\n"
-":020000040800F2\n"
-":100000000000012045040008E1030008E90300089E\n"
-":10001000F1030008F90300080104000800000\n"
-"+HTTPREAD: 0";
-
+    "+HTTPREAD: 100\n"
+    ":020000040800F2\n"
+    ":100000000000012045040008E1030008E90300089E\n"
+    ":10001000F1030008F90300080104000800000\n"
+    "+HTTPREAD: 0";
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-int _write(int file, char *ptr, int len) {
+int _write(int file, char *ptr, int len)
+{
 
-  int i;
-  for (i = 0; i < len; i++) {
-    ITM_SendChar(*ptr++);
-  }
-  return len;
+    int i;
+    for (i = 0; i < len; i++) {
+        ITM_SendChar(*ptr++);
+    }
+    return len;
 }
 
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
 
 /* USER CODE END PM */
 
@@ -79,50 +78,50 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-void check_handle_state(enum GmsModemState status) {
-  switch (status) {
-  case Off: {
-    enable_simcom();
-    is_pb_done = wait_for_pb_done_event();
-    if (is_pb_done) {
-      current_status_simcom = On;
-      printf("Current status Simcom on \r\n");
-    } else {
-      NVIC_SystemReset();
+void check_handle_state(enum GmsModemState status)
+{
+    switch (status) {
+    case Off: {
+        enable_simcom();
+        is_pb_done = wait_for_pb_done_event();
+        if (is_pb_done) {
+            current_status_simcom = On;
+            printf("Current status Simcom on \r\n");
+        } else {
+            NVIC_SystemReset();
+        }
+        break;
     }
-    break;
-  	  }
-  case On: {
-	    is_checked_sim = check_signal_simcom();
-	    if (is_checked_sim) {
-	      HAL_GPIO_WritePin(GPIOB, LED_STATUS_Pin, GPIO_PIN_RESET);
-	      total_errors = 0;
-	      current_status_simcom = Internet_ready;
-	      printf("Current status Simcom Internet Ready\r\n");
-	    } else {
-	      total_errors++;
-	    }
-	    if (total_errors > 5) {
-	      restart_stm32();
-	    }
-	    break;
-  }
-  case Internet_ready:{
-	  is_started_http= get_file_hex_form_simcom();
-	  if(is_started_http==STATUS_OK)
-	  {
-		  current_status_simcom = Mqtt_ready;
-	  }
-	  else total_errors++;
-      if (total_errors > 5) {
-        restart_stm32();
-      }
-      break;
+    case On: {
+        is_checked_sim = check_signal_simcom();
+        if (is_checked_sim) {
+            HAL_GPIO_WritePin(GPIOB, LED_STATUS_Pin, GPIO_PIN_RESET);
+            total_errors = 0;
+            current_status_simcom = Internet_ready;
+            printf("Current status Simcom Internet Ready\r\n");
+        } else {
+            total_errors++;
+        }
+        if (total_errors > 5) {
+            restart_stm32();
+        }
+        break;
     }
-  default:
-	HAL_Delay(2000);
-    printf("\rCase cannot be determined !\r\n");
-  }
+    case Internet_ready: {
+        is_started_http = get_file_hex_form_simcom();
+        if (is_started_http == STATUS_OK) {
+            current_status_simcom = Mqtt_ready;
+        } else
+            total_errors++;
+        if (total_errors > 5) {
+            restart_stm32();
+        }
+        break;
+    }
+    default:
+        HAL_Delay(2000);
+        printf("\rCase cannot be determined !\r\n");
+    }
 }
 
 /* USER CODE END PFP */
@@ -164,19 +163,18 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("HELLO AGRICONNECT\r\n");
-  HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)rx_buffer, 700);
+    printf("HELLO AGRICONNECT\r\n");
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)rx_buffer, 700);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+    while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  check_handle_state(current_status_simcom);
-  }
+        check_handle_state(current_status_simcom);
+    }
   /* USER CODE END 3 */
 }
 
@@ -327,11 +325,10 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1) {
+    }
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -346,8 +343,8 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    /* User can add his own implementation to report the file name and line number,
+       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
